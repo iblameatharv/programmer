@@ -25,6 +25,46 @@
             color: var(--primary);
             min-height: 100vh;
             overflow-x: hidden;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        #boot-logs {
+            width: 80%;
+            height: 60%;
+            overflow-y: auto;
+            padding: 20px;
+            border: 2px solid var(--primary);
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        #loading-progress {
+            width: 80%;
+            height: 20px;
+            border: 2px solid var(--primary);
+            margin-top: 20px;
+        }
+
+        #loading-bar {
+            width: 0;
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.5s ease-in-out;
         }
 
         #terminal, #gui-mode {
@@ -35,11 +75,16 @@
         /* Terminal Styles */
         #terminal {
             padding: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: none;
         }
 
         #output {
             margin-bottom: 20px;
             white-space: pre-wrap;
+            font-size: 1.5rem;
+            font-weight: bold;
         }
 
         #input-line {
@@ -52,7 +97,8 @@
             border: none;
             color: var(--primary);
             font-family: 'VT323', monospace;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
             flex-grow: 1;
             outline: none;
         }
@@ -136,6 +182,7 @@
             padding: 15px;
             margin-bottom: 20px;
             transition: all 0.3s ease;
+            background: rgba(0, 255, 0, 0.05);
         }
 
         .project-card:hover {
@@ -150,7 +197,7 @@
 
         .contact-form input,
         .contact-form textarea {
-            background: transparent;
+            background: rgba(0, 255, 0, 0.1);
             border: 2px solid var(--primary);
             color: var(--primary);
             padding: 10px;
@@ -181,12 +228,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
+            background: repeating-linear-gradient(
                 to bottom,
-                transparent 50%,
-                rgba(0, 0, 0, 0.5) 50%
+                rgba(0, 255, 0, 0.03),
+                rgba(0, 255, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
             );
-            background-size: 100% 4px;
             pointer-events: none;
             z-index: 2;
         }
@@ -210,9 +258,33 @@
             height: 100%;
             background: radial-gradient(
                 circle at center,
-                transparent 0%,
-                rgba(0, 0, 0, 0.2) 100%
+                rgba(0, 255, 0, 0.08) 0%,
+                rgba(0, 0, 0, 0.3) 100%
             );
+            pointer-events: none;
+        }
+
+        /* Matrix Rain Effect */
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.1;
+        }
+
+        /* 3D Animation Container */
+        #three-d-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* Animations */
@@ -265,9 +337,88 @@
         .glitch {
             animation: glitch 0.3s infinite;
         }
+
+        /* New styles for enhanced retro look */
+        .retro-border {
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .retro-button {
+            background: var(--primary);
+            color: var(--background);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .retro-button:hover {
+            background: var(--background);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        /* New animation for text */
+        @keyframes textFlicker {
+            0% {
+                opacity: 0.1;
+            }
+            2% {
+                opacity: 1;
+            }
+            8% {
+                opacity: 0.1;
+            }
+            9% {
+                opacity: 1;
+            }
+            12% {
+                opacity: 0.1;
+            }
+            20% {
+                opacity: 1;
+            }
+            25% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+            70% {
+                opacity: 0.7;
+            }
+            72% {
+                opacity: 0.2;
+            }
+            77% {
+                opacity: 0.9;
+            }
+            100% {
+                opacity: 0.9;
+            }
+        }
+
+        .flicker-text {
+            animation: textFlicker 3s linear infinite;
+        }
     </style>
 </head>
 <body>
+    <div id="loading-screen">
+        <div id="boot-logs"></div>
+        <div id="three-d-container"></div>
+        <div id="loading-progress">
+            <div id="loading-bar"></div>
+        </div>
+    </div>
+
     <div class="scanlines"></div>
     <div class="crt"></div>
 
@@ -288,58 +439,214 @@
                 <a href="#" class="nav-item" onclick="returnToTerminal()">TERMINAL</a>
             </nav>
 
-            <div id="about" class="section active">
-                <h2>&gt; ABOUT_ME.exe</h2>
-                <p>Hello, I'm Atharv Verma!and i'm 16 year old Studying Delhi Public School,Rudrapur </p>
-                <p>I have experience of 4 Years in Computer Programming and Have Learned Languages Like Python,<br>Skills Like Web Designing</p>
-                <p>i'm Currently Studying For My Board Examination for Class 10th and Learning Machine Learning to Create My Own Open Source LLM Model Name Somay.ai</p>
-                <p><br>I Have Created This Website With help of Html JavaScript CSS Hope You Like It <br>You Can Contact Me on - <br><br><br>Email : programmingcatbussiness@gmail.com && atharvverma50@gmail.com <br>Instagram : yoo_atharvv</p>
+            <div id="about" class="section active retro-border">
+                <h2 class="flicker-text">&gt; ABOUT_ME.exe</h2>
+                <p>Hello, I'm Atharv Verma! I'm a 16-year-old student at Delhi Public School, Rudrapur.</p>
+                <p>I have 4 years of experience in Computer Programming and have learned languages like Python, as well as skills in Web Designing.</p>
+                <p>I'm currently studying for my Class 10th Board Examination and learning Machine Learning to create my own Open Source LLM Model named Somay.ai.</p>
+                <p>I created this website using HTML, JavaScript, and CSS. I hope you like it!</p>
+                <p>You can contact me at:</p>
+                <p>Email: atharvverma50@gmail.com</p>
+                <p>Instagram: yoo_atharvv</p>
             </div>
 
             <div id="projects" class="section">
-                <h2>&gt; MY_PROJECTS.exe</h2>
-                <div class="project-card">
+                <h2 class="flicker-text">&gt; MY_PROJECTS.exe</h2>
+                <div class="project-card retro-border">
                     <h3>Orrey Space App</h3>
                     <p>A groundbreaking space visualization project crafted with HTML, JavaScript, and CSS. 
                     This pioneering endeavor represents my first venture into web development, 
                     currently under active development to create an immersive astronomical experience.</p>
-                    <a href="https://github.com/iblameatharv/OrreySpaceApp" target="_blank" class="nav-item">View Source</a>
+                    <a href="https://github.com/iblameatharv/OrreySpaceApp" target="_blank" class="retro-button">View Source</a>
                 </div>
-                <div class="project-card">
+                <div class="project-card retro-border">
                     <h3>ASCII Video Player</h3>
                     <p>A terminal-based video player that converts regular videos into ASCII art. 
                     Created using Python, this project transforms visual content into text-based displays.</p>
-                    <a href="https://github.com/iblameatharv/VIDEO-to-ASCII-Character-in-Python" target="_blank" class="nav-item">View Source</a>
+                    <a href="https://github.com/iblameatharv/VIDEO-to-ASCII-Character-in-Python" target="_blank" class="retro-button">View Source</a>
                 </div>
             </div>
 
             <div id="contact" class="section">
-                <h2>&gt; CONTACT_ME.exe</h2>
-                <form class="contact-form">
-                    <input type="text" placeholder="Enter your name" required>
-                    <input type="email" placeholder="Enter your email" required>
-                    <textarea rows="5" placeholder="Your message" required></textarea>
-                    <button type="submit">SEND_MESSAGE.exe</button>
+                <h2 class="flicker-text">&gt; CONTACT_ME.exe</h2>
+                <form class="contact-form retro-border" action="https://formsubmit.co/atharvverma50@gmail.com" method="POST">
+                    <input type="hidden" name="_next" value="https://your-website.com/thanks.html">
+                    <input type="hidden" name="_subject" value="New submission from your portfolio!">
+                    <input type="text" name="name" placeholder="Enter your name" required>
+                    <input type="email" name="email" placeholder="Enter  your email" required>
+                    <textarea name="message" rows="5" placeholder="Your message" required></textarea>
+                    <button type="submit" class="retro-button">SEND_MESSAGE.exe</button>
                 </form>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // Terminal functionality
+        // Loading screen and boot sequence
+        const loadingScreen = document.getElementById('loading-screen');
+        const bootLogs = document.getElementById('boot-logs');
+        const loadingBar = document.getElementById('loading-bar');
         const terminal = document.getElementById('terminal');
         const output = document.getElementById('output');
         const commandInput = document.getElementById('command-input');
         const guiMode = document.getElementById('gui-mode');
 
-        // Initial welcome message
-        const welcomeMessage = `Atharv [Version 10.0.22631.4317]
+        const bootMessages = [
+    "Initializing core system modules...",
+    "Loading kernel v5.13.1...",
+    "Checking system architecture compatibility...",
+    "Calibrating processors for optimal performance...",
+    "Mounting primary file systems...",
+    "ERROR: Failed to mount /dev/sda3, attempting recovery...",
+    "WARNING: Disk /dev/sda3 may have corrupted sectors...",
+    "Mounting backup partition...",
+    "Allocating memory resources...",
+    "WARNING: High memory usage detected on boot...",
+    "Configuring environment variables...",
+    "ERROR: Variable PATH not found, setting default path...",
+    "Validating BIOS security integrity...",
+    "Establishing communication with I/O devices...",
+    "Device not responding: USB 3.0 port 2 – Retrying...",
+    "ERROR: Network interface wlan0 not found, defaulting to eth0...",
+    "Acquiring IP address...",
+    "WARNING: Slow network response detected...",
+    "Testing DNS server connectivity...",
+    "ERROR: DNS request timed out – switching to secondary DNS...",
+    "Verifying remote server access...",
+    "Starting background services...",
+    "ERROR: Service ‘system-monitor’ failed to start...",
+    "Syncing with time protocol servers...",
+    "WARNING: Time drift detected – adjusting system clock...",
+    "Optimizing system for low latency...",
+    "Initializing hardware monitors...",
+    "WARNING: High CPU temperature detected...",
+    "Checking disk health status...",
+    "ERROR: Disk sector read failure on /dev/sdb1 – attempting repair...",
+    "Validating GPU resources...",
+    "Loading GPU drivers and optimizations...",
+    "ERROR: Unsupported GPU model detected, defaulting to basic graphics mode...",
+    "Allocating VRAM for high-performance graphics...",
+    "Initializing user display interface...",
+    "Configuring display resolution and refresh rate...",
+    "ERROR: Resolution mismatch – reverting to default...",
+    "Loading sound drivers and modules...",
+    "Testing audio output channels...",
+    "WARNING: No audio output device found, continuing without sound...",
+    "Applying user configuration settings...",
+    "ERROR: Config file corrupted – loading default settings...",
+    "Verifying security modules...",
+    "Updating firewall rules...",
+    "Scanning for potential vulnerabilities...",
+    "ERROR: Security vulnerability found in kernel module – patching...",
+    "Activating data encryption modules...",
+    "ERROR: Encryption key mismatch, initiating reset...",
+    "Establishing VPN connection...",
+    "WARNING: Unstable VPN connection detected...",
+    "Initializing AI subsystems...",
+    "Training neural network modules...",
+    "ERROR: Low processing power – switching to reduced AI mode...",
+    "Loading machine learning models...",
+    "WARNING: Model outdated – re-downloading required...",
+    "Setting up predictive analysis framework...",
+    "Calibrating neural network sensitivity...",
+    "Loading biometric authentication...",
+    "ERROR: Facial recognition model not found – defaulting to password login...",
+    "Activating holographic projectors...",
+    "Syncing with external sensors...",
+    "Initializing deep-learning AI...",
+    "ERROR: Sensor data mismatch – recalibrating...",
+    "Linking neural layers to processing cores...",
+    "Loading quantum processing modules...",
+    "WARNING: Quantum coherence error – compensating...",
+    "Stabilizing flux capacitor...",
+    "Verifying system access privileges...",
+    "Establishing blockchain verification...",
+    "ERROR: Verification token expired – requesting new token...",
+    "Optimizing power management protocols...",
+    "Performing final pre-boot integrity check...",
+    "ERROR: System configuration incomplete – running diagnostics...",
+    "Synchronizing with cloud backup systems...",
+    "ERROR: Cloud backup failed – offline mode enabled...",
+    "Booting Atharv's Portfolio OS...",
+    "Launching user interface...",
+    "ERROR: UI assets not fully loaded – loading in safe mode...",
+    "Connecting to cloud resources...",
+    "Engaging safety protocols...",
+    "System ready. WARNING: Boot errors detected. Proceed with caution."
+];
+
+
+        let currentLog = 0;
+        let loadingProgress = 0;
+
+        function simulateBooting() {
+            if (currentLog < bootMessages.length) {
+                bootLogs.innerHTML += bootMessages[currentLog] + "<br>";
+                bootLogs.scrollTop = bootLogs.scrollHeight;
+                currentLog++;
+                loadingProgress = (currentLog / bootMessages.length) * 100;
+                loadingBar.style.width = loadingProgress + "%";
+                setTimeout(simulateBooting, Math.random() * 500 + 200);
+            } else {
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    terminal.style.display = 'block';
+                    initTerminal();
+                }, 1000);
+            }
+        }
+
+        // 3D Animation
+        let scene, camera, renderer, cube, sphere, torus;
+
+        function init3DAnimation() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('three-d-container').appendChild(renderer.domElement);
+
+            const cubeGeometry = new THREE.BoxGeometry();
+            const sphereGeometry = new THREE.SphereGeometry(0.7, 32, 32);
+            const torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 100);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+
+            cube = new THREE.Mesh(cubeGeometry, material);
+            sphere = new THREE.Mesh(sphereGeometry, material);
+            torus = new THREE.Mesh(torusGeometry, material);
+
+            cube.position.x = -2;
+            torus.position.x = 2;
+
+            scene.add(cube);
+            scene.add(sphere);
+            scene.add(torus);
+
+            camera.position.z = 5;
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            sphere.rotation.x += 0.01;
+            sphere.rotation.y += 0.01;
+            torus.rotation.x += 0.01;
+            torus.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+
+        // Terminal functionality
+        function initTerminal() {
+            const welcomeMessage = `Atharv [Version 10.0.22631.4317]
 (c) Github.com. All rights reserved.
 Write Help to get help or Start to Start GUI Mode
 
 root@welcome>`;
 
-        output.textContent = welcomeMessage;
+            output.textContent = welcomeMessage;
+        }
 
         // Command handling
         const commands = {
@@ -355,6 +662,10 @@ root@welcome>`;
     time     - Show current time
     echo     - Echo a message
     color    - Change terminal color (green/red/blue)
+    matrix   - Start Matrix rain effect
+    stopmatrix - Stop Matrix rain effect
+    elapsed  - Show elapsed time
+    3d       - Toggle 3D animation
     `,
             about: `Hello! I'm Atharv, a passionate programmer and designer.
 Currently working on innovative web and software solutions.
@@ -369,11 +680,15 @@ Type 'projects' to see my work or 'contact' for my details.`,
    Convert videos to ASCII art in terminal
    GitHub: https://github.com/iblameatharv/VIDEO-to-ASCII-Character-in-Python`,
             contact: `Contact Information:
-Email: programmingcatbussiness@gmail.com
+Email: atharvverma50@gmail.com
 Instagram: @yoo_atharvv`,
             social: `Social Media Links:
 GitHub: https://github.com/iblameatharv
-Instagram: https://instagram.com/yoo_atharvv`
+Instagram: https://instagram.com/yoo_atharvv`,
+            matrix: `Starting Matrix rain effect...`,
+            stopmatrix: `Stopping Matrix rain effect...`,
+            elapsed: `Showing elapsed time...`,
+            '3d': `Toggling 3D animation...`
         };
 
         function handleCommand(command) {
@@ -422,6 +737,22 @@ Instagram: https://instagram.com/yoo_atharvv`
                     } else {
                         response = 'Available colors: green, red, blue';
                     }
+                    break;
+                case 'matrix':
+                    startMatrixRain();
+                    response = commands.matrix;
+                    break;
+                case 'stopmatrix':
+                    stopMatrixRain();
+                    response = commands.stopmatrix;
+                    break;
+                case 'elapsed':
+                    showElapsedTime();
+                    response = commands.elapsed;
+                    break;
+                case '3d':
+                    toggle3DAnimation();
+                    response = commands['3d'];
                     break;
                 default:
                     response = `Command not found: ${command}\nType "help" for available commands`;
@@ -487,20 +818,119 @@ Instagram: https://instagram.com/yoo_atharvv`
         });
 
         // Handle contact form submission
-        
         document.querySelector('.contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
             const button = this.querySelector('button');
             button.textContent = 'SENDING...';
             
             setTimeout(() => {
                 button.textContent = 'MESSAGE_SENT.exe';
-                this.reset();
                 setTimeout(() => {
                     button.textContent = 'SEND_MESSAGE.exe';
                 }, 2000);
             }, 1500);
         });
+
+        // Matrix Rain Effect
+        let matrixInterval;
+        let elapsedInterval;
+        let startTime;
+
+        function startMatrixRain() {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'matrix-rain';
+            document.body.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?';
+            const columns = canvas.width / 20;
+            const drops = [];
+
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0F0';
+                ctx.font = '20px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = characters[Math.floor(Math.random() * characters.length)];
+                    ctx.fillText(text, i * 20, drops[i] * 20);
+                    if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            matrixInterval = setInterval(draw, 50);
+        }
+
+        function stopMatrixRain() {
+            clearInterval(matrixInterval);
+            const canvas = document.getElementById('matrix-rain');
+            if (canvas) {
+                canvas.remove();
+            }
+        }
+
+        function showElapsedTime() {
+            startTime = new Date();
+            elapsedInterval = setInterval(() => {
+                const now = new Date();
+                const elapsed = new Date(now - startTime);
+                const hours = elapsed.getUTCHours().toString().padStart(2, '0');
+                const minutes = elapsed.getUTCMinutes().toString().padStart(2, '0');
+                const seconds = elapsed.getUTCSeconds().toString().padStart(2, '0');
+                output.textContent = `Elapsed time: ${hours}:${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey) {
+                switch (e.key) {
+                    case 'm':
+                        e.preventDefault();
+                        handleCommand('matrix');
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        handleCommand('elapsed');
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        startGUIMode();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        returnToTerminal();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        handleCommand('3d');
+                        break;
+                }
+            }
+        });
+
+        // Resize event listener for 3D animation
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        // Initialize and start the boot sequence
+        init3DAnimation();
+        animate3D();
+        simulateBooting();
     </script>
 </body>
 </html>
